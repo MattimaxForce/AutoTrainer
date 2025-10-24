@@ -20,6 +20,24 @@ It allows you to configure, optimize, and launch model training with just a few 
 
 ---
 
+## ⚙️ Configuration
+
+All settings are managed from the `config.json` file:
+
+```json
+{
+  "ui_mode": "true",
+  "web_host": "127.0.0.1",
+  "web_port": 7860
+}
+```
+
+▶️ How it works
+
+If "ui_mode": "true" → the application opens a PyQt5 graphical window
+
+If "ui_mode": "false" → the interface is hosted on your web browser at the address http://127.0.0.1:7860
+
 ## 🧩 Installation
 
 You can install and use AutoTrainer Wizard in two ways.
@@ -179,3 +197,4 @@ If you’re not sure what to configure:
 ## 📜 License
 
 This project is released under the **MIT License**.
+
