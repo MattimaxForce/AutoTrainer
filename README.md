@@ -1,4 +1,3 @@
-````markdown
 # 🧠 AutoTrainer Wizard  
 **Automated AI Model Training — Simplified, Powerful, Adaptable**
 
@@ -35,7 +34,6 @@ You can install and use AutoTrainer Wizard in two ways.
 5. Install the dependencies:
    ```bash
    pip install -r requirements.txt
-````
 
 6. Launch the application:
 
@@ -181,5 +179,3 @@ If you’re not sure what to configure:
 ## 📜 License
 
 This project is released under the **MIT License**.
-```
-```
