@@ -1,0 +1,47 @@
+/* Custom animations */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+/* Additional custom styles */
+.input-focus-effect:focus {
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.3);
+    transition: all 0.2s ease;
+}
+
+.toggle-switch {
+    transition: all 0.3s ease;
+}
+
+/* Smooth transitions for form elements */
+input, select, textarea, button {
+    transition: all 0.2s ease;
+}
+
+/* Gradient text utility */
+.gradient-text {
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+}

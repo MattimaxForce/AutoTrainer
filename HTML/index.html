@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HF AutoTrain Wizard</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+</head>
+<body class="bg-black text-gray-100 min-h-screen">
+    <div id="vanta-effect" class="fixed inset-0 w-full h-full z-0"></div>
+    <div class="relative z-10 min-h-screen flex flex-col">
+        <custom-navbar></custom-navbar>
+        
+        <main class="flex-grow container mx-auto px-4 py-12">
+            <div class="max-w-4xl mx-auto bg-gray-900 bg-opacity-80 backdrop-blur-lg rounded-xl shadow-2xl overflow-hidden">
+                <!-- Header Section -->
+                <div class="px-8 py-6 border-b border-gray-800">
+                    <div class="flex items-center space-x-4">
+                        <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" alt="HuggingFace" class="h-10">
+                        <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">AutoTrain Wizard</h1>
+                    </div>
+                    <p class="mt-2 text-gray-400">Automate your model training with HuggingFace</p>
+                </div>
+
+                <!-- Main Form -->
+                <div class="p-8">
+                    <!-- Model and Dataset Inputs -->
+                    <div class="space-y-6">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-300">Model Name</label>
+                            <div class="relative">
+                                <input type="text" id="model-name" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="bert-base-uncased">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i data-feather="box" class="text-gray-500"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-300">Dataset Path</label>
+                            <div class="relative">
+                                <input type="text" id="dataset-path" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="username/dataset-name">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i data-feather="database" class="text-gray-500"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Optimization Toggles -->
+                    <div class="mt-12">
+                        <h2 class="text-xl font-semibold text-gray-300 mb-6">Training Configuration</h2>
+                        
+                        <!-- Optimizer Section -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Left Column -->
+                            <div class="space-y-6">
+                                <div class="p-5 bg-gray-800 rounded-xl">
+                                    <h3 class="font-medium text-gray-300 mb-4 flex items-center">
+                                        <i data-feather="zap" class="mr-2"></i> Optimizer
+                                    </h3>
+                                    <div class="space-y-3">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-gray-400">AdamW</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" name="optimizer" value="adamw" class="sr-only peer" checked>
+                                                <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                            </label>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-gray-400">SGD</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" name="optimizer" value="sgd" class="sr-only peer">
+                                                <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                            </label>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-gray-400">Adafactor</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" name="optimizer" value="adafactor" class="sr-only peer">
+                                                <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Learning Rate -->
+                                <div class="p-5 bg-gray-800 rounded-xl">
+                                    <h3 class="font-medium text-gray-300 mb-4 flex items-center">
+                                        <i data-feather="activity" class="mr-2"></i> Learning Rate
+                                    </h3>
+                                    <div class="space-y-3">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-gray-400">Learning Rate</span>
+                                            <input type="number" step="0.0001" min="0" value="0.0001" class="w-24 bg-gray-700 border border-gray-600 rounded px-3 py-1 text-white text-right">
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-gray-400">Scheduler</span>
+                                            <select class="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-white">
+                                                <option>Linear</option>
+                                                <option>Cosine</option>
+                                                <option>Polynomial</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div class="space-y-6">
+                                <!-- Precision -->
+                                <div class="p-5 bg-gray-800 rounded-xl">
+                                    <h3 class="font-medium text-gray-300 mb-4 flex items-center">
+                                        <i data-feather="cpu" class="mr-2"></i> Precision
+                                    </h3>
+                                    <div class="space-y-3">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-gray-400">FP32</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="radio" name="precision" value="fp32" class="sr-only peer" checked>
+                                                <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                            </label>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-gray-400">FP16</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="radio" name="precision" value="fp16" class="sr-only peer">
+                                                <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                            </label>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-gray-400">BF16</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="radio" name="precision" value="bf16" class="sr-only peer">
+                                                <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Training Settings -->
+                                <div class="p-5 bg-gray-800 rounded-xl">
+                                    <h3 class="font-medium text-gray-300 mb-4 flex items-center">
+                                        <i data-feather="settings" class="mr-2"></i> Training
+                                    </h3>
+                                    <div class="space-y-3">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-gray-400">Epochs</span>
+                                            <input id="epochs" type="number" min="1" value="3" class="w-24 bg-gray-700 border border-gray-600 rounded px-3 py-1 text-white text-right">
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-gray-400">Batch Size</span>
+                                            <input id="batch-size" type="number" min="1" value="8" class="w-24 bg-gray-700 border border-gray-600 rounded px-3 py-1 text-white text-right">
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-gray-400">Gradient Accumulation</span>
+                                            <input id="grad-acc" type="number" min="1" value="2" class="w-24 bg-gray-700 border border-gray-600 rounded px-3 py-1 text-white text-right">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="mt-10">
+                        <button id="train-button" class="w-full py-3 px-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg shadow-lg hover:opacity-90 transition-all duration-300 flex items-center justify-center">
+                            <i data-feather="play" class="mr-2"></i> Start Training
+                        </button>
+                        
+                        <!-- Progress and logs -->
+                        <div class="mt-4">
+                            <div class="w-full bg-gray-800 rounded-lg overflow-hidden">
+                                <div id="progress-container" class="h-4 bg-gray-700">
+                                    <div id="progress-bar" style="height:100%; width:0%;" class="bg-gradient-to-r from-purple-600 to-pink-600"></div>
+                                </div>
+                            </div>
+                            <div id="log-output" class="mt-4 p-4 bg-gray-800 rounded-lg h-40 overflow-auto text-sm font-mono text-gray-200"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <custom-footer></custom-footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/components/navbar.js"></script>
+    <script src="/static/components/footer.js"></script>
+    <script src="/static/script.js"></script>
+    <script>
+        feather.replace();
+        
+        // Vanta.js background effect
+        VANTA.NET({
+            el: "#vanta-effect",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: window.innerHeight,
+            minWidth: window.innerWidth,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x5a3cb8,
+            backgroundColor: 0x0,
+            points: 12.00,
+            maxDistance: 22.00,
+            spacing: 16.00
+        });
+
+        // Radio button group behavior for precision options
+        document.querySelectorAll('input[name="precision"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.checked) {
+                    document.querySelectorAll('input[name="precision"]').forEach(other => {
+                        if (other !== this) {
+                            other.checked = false;
+                        }
+                    });
+                }
+            });
+        });
+
+        // Train button action is handled by /static/script.js
+    </script>
+</body>
+</html>
