@@ -105,17 +105,18 @@ def avvia_training(model_id, dataset_id, epochs=1, batch_size=4, precision_overr
     split = "train" if "train" in data else list(data.keys())[0]
 
     # try common column names first
-    common_text_names = ["text", "sentence", "review", "content", "article", "document", "text_a", "text1", "prompt"]
-    common_label_names = ["label", "labels", "target", "label_ids", "label_id", "category", "response"]
+    common_text_names = ["text", "sentence", "review", "content", "article", "document", "text_a", "text1", "prompt", "question"]
+    # include common response-like names (answer, response, reply)
+    common_label_names = ["label", "labels", "target", "label_ids", "label_id", "category", "response", "answer", "reply"]
 
-    # Get first row to check structure
+    # Get column names and build a small sample of rows (handle nested structure)
     try:
         first_row = data[split][0]
-        # Check if data is nested under the split key
-        if isinstance(first_row, dict) and split in first_row and isinstance(first_row[split], dict):
-            actual_data = first_row[split]
-            col_names = list(actual_data.keys())
+        nested_under_split = isinstance(first_row, dict) and split in first_row and isinstance(first_row[split], dict)
+        if nested_under_split:
             log(f"Rilevata struttura dati nidificata sotto chiave '{split}'")
+            # columns are the keys of the inner dict
+            col_names = list(first_row[split].keys())
         else:
             col_names = data[split].column_names
         log(f"Colonne disponibili dataset: {col_names}")
@@ -123,9 +124,23 @@ def avvia_training(model_id, dataset_id, epochs=1, batch_size=4, precision_overr
         log(f"Errore nell'analisi della struttura del dataset: {e}", level="error")
         return False
 
+    # build sample rows as plain dicts for easier analysis
+    sample_count = min(100, len(data[split]))
+    sample_rows = []
+    for i in range(sample_count):
+        try:
+            row = data[split][i]
+            if nested_under_split and isinstance(row, dict) and split in row and isinstance(row[split], dict):
+                sample_rows.append(row[split])
+            else:
+                sample_rows.append(row)
+        except Exception:
+            continue
+
     text_col = None
     label_col = None
 
+    # prefer explicit common names first
     for name in common_text_names:
         if name in col_names:
             text_col = name
@@ -136,48 +151,52 @@ def avvia_training(model_id, dataset_id, epochs=1, batch_size=4, precision_overr
             label_col = name
             break
 
-    # heuristic scanning over first N rows
+    # heuristic scanning over sample rows if we still don't have both columns
     if text_col is None or label_col is None:
-        sample_count = min(100, len(data[split]))
         str_counts = {c: 0 for c in col_names}
-        num_unique = {}
-        for i in range(sample_count):
-            row = data[split][i]
+        num_unique = {c: set() for c in col_names}
+        for row in sample_rows:
             for c in col_names:
-                v = row[c]
+                try:
+                    v = row.get(c, None) if isinstance(row, dict) else None
+                except Exception:
+                    v = None
                 if isinstance(v, str):
                     str_counts[c] += 1
-                # handle lists of strings
                 elif isinstance(v, (list, tuple)) and all(isinstance(x, str) for x in v):
                     str_counts[c] += 1
-                # count uniques for numeric-like fields
-                try:
-                    if c not in num_unique:
-                        num_unique[c] = set()
-                    # try to add scalar values
+                else:
+                    # treat None as not-a-string; collect uniques for numeric-like
                     if isinstance(v, (int, float, bool)):
                         num_unique[c].add(v)
-                except Exception:
-                    pass
 
-        # choose text column as the one with highest str count
+        # choose text column as the string column with highest string count
         if text_col is None:
             sorted_by_str = sorted(str_counts.items(), key=lambda x: x[1], reverse=True)
             if sorted_by_str and sorted_by_str[0][1] > 0:
                 text_col = sorted_by_str[0][0]
 
-        # choose label column as numeric column with small unique set
+        # choose label column: prefer another string column (not the text col) with high string count
         if label_col is None:
-            candidates = []
-            for c, s in num_unique.items():
-                try:
-                    uniq = len(s)
-                except Exception:
-                    uniq = 999999
-                candidates.append((c, uniq))
-            candidates = sorted(candidates, key=lambda x: x[1])
-            if candidates and candidates[0][1] < max(50, sample_count // 2):
-                label_col = candidates[0][0]
+            sorted_by_str = sorted(str_counts.items(), key=lambda x: x[1], reverse=True)
+            for name, cnt in sorted_by_str:
+                if name == text_col:
+                    continue
+                if cnt > 0:
+                    label_col = name
+                    break
+            # fallback: choose numeric-like column with small unique set
+            if label_col is None:
+                candidates = []
+                for c, s in num_unique.items():
+                    try:
+                        uniq = len(s)
+                    except Exception:
+                        uniq = 999999
+                    candidates.append((c, uniq))
+                candidates = sorted(candidates, key=lambda x: x[1])
+                if candidates and candidates[0][1] < max(50, sample_count // 2):
+                    label_col = candidates[0][0]
 
     log(f"Rilevate colonne candidate: text='{text_col}', label='{label_col}'")
     if text_col is None or label_col is None:
